@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import com.example.pc.entities.Pc;
+import com.example.pc.entities.Style;
 import com.example.pc.repos.PcRepository;
 
 @Service
@@ -47,5 +48,40 @@ public class PcServiceImpl implements PcService {
     @Override
     public Page<Pc> getAllPcsParPage(int page, int size) {
         return pcRepository.findAll(PageRequest.of(page, size));
+    }
+
+    @Override
+    public List<Pc> findByNomPc(String nom) {
+        return pcRepository.findByNomPc(nom);
+    }
+
+    @Override
+    public List<Pc> findByNomPcContains(String nom) {
+        return pcRepository.findByNomPcContains(nom);
+    }
+
+    @Override
+    public List<Pc> findByNomPrix(String nom, Double prix) {
+        return pcRepository.findByNomPrix(nom, prix);
+    }
+
+    @Override
+    public List<Pc> findByStyle(Style style) {
+        return pcRepository.findByStyle(style);
+    }
+
+    @Override
+    public List<Pc> findByStyleIdStyle(Long id) {
+        return pcRepository.findByStyleIdStyle(id);
+    }
+
+    @Override
+    public List<Pc> findByOrderByNomPcAsc() {
+        return pcRepository.findByOrderByNomPcAsc();
+    }
+
+    @Override
+    public List<Pc> trierPcsNomsPrix() {
+        return pcRepository.trierPcsNomsPrix();
     }
 }

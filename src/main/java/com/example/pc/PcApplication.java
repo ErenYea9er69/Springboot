@@ -20,9 +20,8 @@ public class PcApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Décommentez ces lignes une fois que votre constructeur Pc(String, Double, Date) est prêt
-        // pcService.savePc(new Pc("PC Asus N7", 2000.0, new Date()));
-        // pcService.savePc(new Pc("Huawei Matebook", 2500.0, new Date()));
-        // pcService.savePc(new Pc("MacBook Pro", 3500.0, new Date()));
+        //pcService.savePc(new Pc("PC Asus N7", 2000.0, new Date()));
+        //pcService.savePc(new Pc("Huawei Matebook", 2500.0, new Date()));
+        //pcService.savePc(new Pc("MacBook Pro", 3500.0, new Date()));
     }
 }
