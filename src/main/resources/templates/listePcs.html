@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/Layout">
+<head>
+    <meta charset="utf-8">
+    <title>Liste des Pcs</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+    <div th:replace="template"></div>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header">Liste des Pcs</div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom Pc</th>
+                        <th>Prix</th>
+                        <th>Date Création</th>
+                        <th>Style</th>
+                        <th colspan="2">Actions</th>
+                    </tr>
+                    <tr th:each="p:${pcs.content}">
+                        <td th:text="${p.idPc}"></td>
+                        <td th:text="${p.nomPc}"></td>
+                        <td th:text="${p.prixPc}"></td>
+                        <td th:text="${p.dateCreation}"></td>
+                        
+                        <td th:if="${p.style != null}" th:text="${p.style.nomStyle}"></td>
+                        <td th:if="${p.style == null}" th:text="${'Pas de Style'}"></td>
+                        
+                        <td><a class="btn btn-success" 
+                               th:href="@{modifierPc(id=${p.idPc}, page=${currentPage}, size=${size})}">Editer</a>
+                        </td>
+                        <td><a class="btn btn-danger" 
+                               onclick="return confirm('Etes-vous sûr ?')"
+                               th:href="@{supprimerPc(id=${p.idPc}, page=${currentPage}, size=${size})}">Supprimer</a>
+                        </td>
+                    </tr>
+                </table>
+                <ul class="nav nav-pills">
+                    <li th:each="page,status:${pages}">
+                        <a th:class="${status.index==currentPage?'btn btn-primary':'btn' }"
+                           th:href="@{listePcs(page=${status.index}, size=${size})}"
+                           th:text="${status.index}"></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
