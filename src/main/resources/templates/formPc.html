@@ -25,22 +25,19 @@
                     
                     <div class="form-group">
                         <label class="control-label">Nom Pc : </label>
-                        <input type="text" name="nomPc" class="form-control" th:value="${pc.nomPc}" required />
+                        <input type="text" name="nomPc" class="form-control" th:value="${pc.nomPc}" />
                         <span th:errors="${pc.nomPc}" class="text-danger"> </span>
                     </div>
                     
                     <div class="form-group">
                         <label class="control-label">Prix Pc: </label>
-                        <input type="number" step="0.01" name="prixPc" class="form-control" th:value="${pc.prixPc}" required />
+                        <input type="text" name="prixPc" class="form-control" th:value="${pc.prixPc}" />
                         <span th:errors="${pc.prixPc}" class="text-danger"> </span>
                     </div>
                     
                     <div class="form-group">
                         <label class="control-label">Date création: </label>
-                        <input type="date" name="dateCreation" class="form-control" 
-                               th:value="${pc.dateCreation}" 
-                               th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" 
-                               required />
+                        <input type="date" name="dateCreation" class="form-control" th:value="${pc.dateCreation}" />
                         <span th:errors="${pc.dateCreation}" class="text-danger"> </span>
                     </div>
 
