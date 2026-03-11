@@ -1,14 +1,19 @@
 package com.example.pc.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import com.example.pc.dto.PcDTO;
 import com.example.pc.entities.Pc;
 import com.example.pc.entities.Style;
 import com.example.pc.repos.PcRepository;
-import com.example.pc.repos.StyleRepository;
 
 @Service
 public class PcServiceImpl implements PcService {
@@ -17,16 +22,16 @@ public class PcServiceImpl implements PcService {
     PcRepository pcRepository;
 
     @Autowired
-    StyleRepository styleRepository;
+    ModelMapper modelMapper;
 
     @Override
-    public Pc savePc(Pc p) {
-        return pcRepository.save(p);
+    public PcDTO savePc(PcDTO p) {
+        return convertEntityToDto(pcRepository.save(convertDtoToEntity(p)));
     }
 
     @Override
-    public Pc updatePc(Pc p) {
-        return pcRepository.save(p);
+    public PcDTO updatePc(PcDTO p) {
+        return convertEntityToDto(pcRepository.save(convertDtoToEntity(p)));
     }
 
     @Override
@@ -40,22 +45,68 @@ public class PcServiceImpl implements PcService {
     }
 
     @Override
-    public Pc getPc(Long id) {
-        return pcRepository.findById(id).get();
+    public PcDTO getPc(Long id) {
+        return convertEntityToDto(pcRepository.findById(id).get());
     }
 
     @Override
-    public List<Pc> getAllPcs() {
-        return pcRepository.findAll();
+    public List<PcDTO> getAllPcs() {
+        return pcRepository.findAll().stream()
+                .map(this::convertEntityToDto)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Page<Pc> getAllPcsParPage(int page, int size) {
-        return pcRepository.findAll(PageRequest.of(page, size));
+    public Page<PcDTO> getAllPcsParPage(int page, int size) {
+        Page<Pc> pcs = pcRepository.findAll(PageRequest.of(page, size));
+        return pcs.map(this::convertEntityToDto);
     }
 
     @Override
-    public List<Style> getAllStyles() {
-        return styleRepository.findAll();
+    public List<Pc> findByNomPc(String nom) {
+        return pcRepository.findByNomPc(nom);
+    }
+
+    @Override
+    public List<Pc> findByNomPcContains(String nom) {
+        return pcRepository.findByNomPcContains(nom);
+    }
+
+    @Override
+    public List<Pc> findByNomPrix(String nom, Double prix) {
+        return pcRepository.findByNomPrix(nom, prix);
+    }
+
+    @Override
+    public List<Pc> findByStyle(Style style) {
+        return pcRepository.findByStyle(style);
+    }
+
+    @Override
+    public List<Pc> findByStyleIdStyle(Long id) {
+        return pcRepository.findByStyleIdStyle(id);
+    }
+
+    @Override
+    public List<Pc> findByOrderByNomPcAsc() {
+        return pcRepository.findByOrderByNomPcAsc();
+    }
+
+    @Override
+    public List<Pc> trierPcsNomsPrix() {
+        return pcRepository.trierPcsNomsPrix();
+    }
+
+    @Override
+    public PcDTO convertEntityToDto(Pc pc) {
+        modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
+        return modelMapper.map(pc, PcDTO.class);
+    }
+
+    @Override
+    public Pc convertDtoToEntity(PcDTO pcDto) {
+        Pc pc = new Pc();
+        pc = modelMapper.map(pcDto, Pc.class);
+        return pc;
     }
 }

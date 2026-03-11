@@ -1,18 +1,22 @@
 package com.example.pc.controllers;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import jakarta.validation.Valid;
-
-import com.example.pc.entities.Pc;
-import com.example.pc.entities.Style;
+import com.example.pc.dto.PcDTO;
+import com.example.pc.repos.StyleRepository;
 import com.example.pc.service.PcService;
 
 @Controller
@@ -21,83 +25,77 @@ public class PcControllers {
     @Autowired
     PcService pcService;
 
-    @RequestMapping("/listePcs")
-    public String listePcs(ModelMap modelMap,
-                           @RequestParam(name = "page", defaultValue = "0") int page,
-                           @RequestParam(name = "size", defaultValue = "2") int size) {
-        Page<Pc> prods = pcService.getAllPcsParPage(page, size);
-        modelMap.addAttribute("pcs", prods);
-        modelMap.addAttribute("pages", new int[prods.getTotalPages()]);
-        modelMap.addAttribute("currentPage", page);
-        modelMap.addAttribute("size", size);
-        return "listePcs";
+    @Autowired
+    StyleRepository styleRepository;
+
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setLenient(false);
+        binder.registerCustomEditor(Date.class, new CustomDateEditor(dateFormat, true));
     }
 
     @RequestMapping("/showCreate")
     public String showCreate(ModelMap modelMap) {
-        List<Style> styles = pcService.getAllStyles(); // [cite: 326]
-        modelMap.addAttribute("pc", new Pc()); // [cite: 327]
-        modelMap.addAttribute("mode", "new"); // [cite: 328]
-        modelMap.addAttribute("styles", styles); // [cite: 329]
-        return "formPc"; // [cite: 330]
+        modelMap.addAttribute("pc", new PcDTO());
+        modelMap.addAttribute("mode", "new");
+        modelMap.addAttribute("styles", styleRepository.findAll());
+        return "formPc";
     }
 
     @RequestMapping("/savePc")
-    public String savePc(@Valid Pc pc, BindingResult bindingResult, // [cite: 359]
-                         @RequestParam(name = "page", defaultValue = "0") int page, // [cite: 360]
-                         @RequestParam(name = "size", defaultValue = "2") int size, // [cite: 361]
-                         ModelMap modelMap) {
-        
-        int currentPage; // [cite: 363]
-        boolean isNew = false; // [cite: 364]
-        
+    public String savePc(@Valid @ModelAttribute("pc") PcDTO pc, BindingResult bindingResult, ModelMap modelMap) {
         if (bindingResult.hasErrors()) {
-            // Re-fetch styles if validation fails so the dropdown populates
-            modelMap.addAttribute("styles", pcService.getAllStyles()); 
-            return "formPc"; // [cite: 365]
+            modelMap.addAttribute("mode", "new");
+            modelMap.addAttribute("styles", styleRepository.findAll());
+            return "formPc";
         }
-        
-        if (pc.getIdPc() == null) // [cite: 366]
-            isNew = true; // [cite: 367]
-            
-        pcService.savePc(pc); // [cite: 368]
-        
-        if (isNew) { // [cite: 369]
-            Page<Pc> prods = pcService.getAllPcsParPage(page, size); // [cite: 371]
-            currentPage = prods.getTotalPages() - 1; // [cite: 372]
-        } else {
-            currentPage = page; // [cite: 374]
-        }
-        
-        return ("redirect:/listePcs?page=" + currentPage + "&size=" + size); // [cite: 375]
+        pcService.savePc(pc);
+        return "redirect:/listePcs";
     }
 
-    @RequestMapping("/modifierPc")
-    public String editerPc(@RequestParam("id") Long id, ModelMap modelMap,
-                           @RequestParam(name = "page", defaultValue = "0") int page,
-                           @RequestParam(name = "size", defaultValue = "2") int size) {
-        Pc p = pcService.getPc(id); // [cite: 335]
-        List<Style> styles = pcService.getAllStyles(); // [cite: 336]
-        
-        modelMap.addAttribute("pc", p); // [cite: 337]
-        modelMap.addAttribute("mode", "edit"); // [cite: 338]
-        modelMap.addAttribute("styles", styles); // [cite: 339]
-        modelMap.addAttribute("page", page);
-        modelMap.addAttribute("size", size);
-        
-        return "formPc"; // [cite: 340]
+    @RequestMapping({"/ListePcs", "/listePcs"})
+    public String listePcs(ModelMap modelMap,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "2") int size) {
+        Page<PcDTO> prods = pcService.getAllPcsParPage(page, size);
+        modelMap.addAttribute("pcs", prods);
+        modelMap.addAttribute("pages", new int[prods.getTotalPages()]);
+        modelMap.addAttribute("currentPage", page);
+        return "listePcs";
     }
 
     @RequestMapping("/supprimerPc")
-    public String supprimerPc(@RequestParam("id") Long id, ModelMap modelMap,
-                              @RequestParam(name = "page", defaultValue = "0") int page,
-                              @RequestParam(name = "size", defaultValue = "2") int size) {
+    public String supprimerPc(@RequestParam("id") Long id,
+            ModelMap modelMap,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "2") int size) {
         pcService.deletePcById(id);
-        Page<Pc> prods = pcService.getAllPcsParPage(page, size);
+        Page<PcDTO> prods = pcService.getAllPcsParPage(page, size);
         modelMap.addAttribute("pcs", prods);
         modelMap.addAttribute("pages", new int[prods.getTotalPages()]);
         modelMap.addAttribute("currentPage", page);
         modelMap.addAttribute("size", size);
         return "listePcs";
+    }
+
+    @RequestMapping("/modifierPc")
+    public String editerPc(@RequestParam("id") Long id, ModelMap modelMap) {
+        PcDTO p = pcService.getPc(id);
+        modelMap.addAttribute("pc", p);
+        modelMap.addAttribute("mode", "edit");
+        modelMap.addAttribute("styles", styleRepository.findAll());
+        return "formPc";
+    }
+
+    @RequestMapping("/updatePc")
+    public String updatePc(@Valid @ModelAttribute("pc") PcDTO pc, BindingResult bindingResult, ModelMap modelMap) {
+        if (bindingResult.hasErrors()) {
+            modelMap.addAttribute("mode", "edit");
+            modelMap.addAttribute("styles", styleRepository.findAll());
+            return "formPc";
+        }
+        pcService.updatePc(pc);
+        return "redirect:/listePcs";
     }
 }

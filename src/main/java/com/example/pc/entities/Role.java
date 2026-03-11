@@ -1,34 +1,22 @@
 package com.example.pc.entities;
 
-import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class Style {
+public class Role {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idStyle;
+    private Long role_id;
     
-    private String nomStyle;
-    private String descriptionStyle;
-    
-    @OneToMany(mappedBy = "style")
-    @JsonIgnore
-    @ToString.Exclude
-    private List<Pc> pcs;
+    private String role;
 }
